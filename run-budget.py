@@ -14,10 +14,7 @@ import yaml
 #quite a bit of code taken from the following tutorials
 #https://developers.google.com/sheets/api/quickstart/python
 
-# If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
-# The ID and range of a sample spreadsheet.
 
 with open("config.yml", "r") as ymlfile:
   cfg = yaml.safe_load(ymlfile)
@@ -31,7 +28,6 @@ CARD_RANGE = DECK_NAME + "!A2:B"
 def main():
   # print(fetch_card_prices([["Alloy Anim"]]))
   # return
-  #TODO file read for sheet id and rang
   sheet = get_sheet(get_credentials())
   cards = fetch_card_names(sheet)
   cards = fetch_card_prices(cards)
@@ -77,7 +73,6 @@ def fetch_card_names(sheet):
         .get(spreadsheetId=SPREADSHEET_ID, range=CARD_RANGE)
         .execute()
     )
-    # return result
     return result.get("values", [])
 
 
@@ -87,7 +82,7 @@ def fetch_card_prices(cards):
     # print(card)
     if len(card) == 2:
       continue
-    time.sleep(0.100)
+    time.sleep(0.100)  #TODO make sleep more effient, only waiting between requests
     while len(card) < 2:
       card.append(0)
     response = requests.get("https://api.scryfall.com/cards/search?unique=prints&order=usd&q="+card[0])
@@ -118,26 +113,6 @@ def fetch_card_prices(cards):
 #   print(cards)
   return cards
 
-#   req = {
-#     "identifiers":[
-#       {
-#         "name": "Palladium Myr"
-#       }
-#     ]
-#   }
-#   response = requests.post("https://api.scryfall.com/cards/collection", json=req)
-#   print(response.json())
-
-#   prices = []
-#   for card in cards:
-#     time.sleep(0.100)#TODO could be more efficient, only waiting between requests,
-#     response = requests.get("https://api.scryfall.com/cards/named?fuzzy="+card[0])
-#     if response.status_code == 404:
-#       prices.append('ERR')
-#     else:
-#       prices.append(response.json()["prices"]["usd"])
-#   return prices
-
 def upload_card_prices(cards, sheet):
   
   body = {
@@ -151,9 +126,6 @@ def upload_card_prices(cards, sheet):
    ]}
   response = sheet.values().batchUpdate(spreadsheetId = SPREADSHEET_ID, body = body).execute()
   # print(response)
-  return
-
-#   sheet.values().update(spreadsheetId=SPREADSHEET_ID, range=CARD_RANGE, valueInputOption="USER_ENTERED", body=body).execute()
   return
 
 if __name__ == "__main__":
